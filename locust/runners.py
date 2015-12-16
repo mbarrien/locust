@@ -321,6 +321,7 @@ class MasterLocustRunner(DistributedLocustRunner):
         events.master_stop_hatching.fire()
 
     def quit(self):
+        self.stop()
         for client in self.clients.itervalues():
             self.server.send(Message("quit", None, None))
         self.greenlet.kill(block=True)
