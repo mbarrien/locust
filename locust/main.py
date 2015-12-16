@@ -242,6 +242,23 @@ def parse_options():
         help="extra argument to pass to each locust's initializer. Repeatable."
     )
 
+    parser.add_option(
+        '--start-swarm',
+        action='store_true',
+        dest='start_swarm',
+        default=False,
+        help='start swarm on the master. Cannot be used with --master'
+    )
+
+    parser.add_option(
+        '--slave-count',
+        action='store',
+        dest='slave_count',
+        type='int',
+        default=0,
+        help='Start swarm when this many slaves have connected. Only used together with --master'
+    )
+
     # Finalize
     # Return three-tuple of parser + the output from parse_args (opt obj, args)
     opts, args = parser.parse_args()
@@ -401,11 +418,6 @@ def main():
         console_logger.info(dumps(task_data))
         sys.exit(0)
 
-    # if --master is set, make sure --no-web isn't set
-    if options.master and options.no_web:
-        logger.error("Locust can not run distributed with the web interface disabled (do not use --no-web and --master together)")
-        sys.exit(0)
-
     if options.no_reset_stats:
         runners.RESET_STATS_AFTER_HATCHING = False
     if not runners.RESET_STATS_AFTER_HATCHING:
@@ -416,7 +428,7 @@ def main():
         logger.info("Starting web monitor at %s:%s" % (options.web_host or "*", options.port))
         main_greenlet = gevent.spawn(web.start, locust_classes, options)
 
-    if not options.master and not options.slave:
+    if not options.master and not options.slave and not options.start_swarm:
         runners.locust_runner = LocalLocustRunner(locust_classes, options)
         # spawn client spawning/hatching greenlet
         if options.no_web:
@@ -424,7 +436,9 @@ def main():
             main_greenlet = runners.locust_runner.greenlet
     elif options.master:
         runners.locust_runner = MasterLocustRunner(locust_classes, options)
-    elif options.slave:
+        if options.no_web:
+            main_greenlet = runners.locust_runner.greenlet
+    elif options.slave or options.start_swarm:
         try:
             runners.locust_runner = SlaveLocustRunner(locust_classes, options)
             main_greenlet = runners.locust_runner.greenlet
