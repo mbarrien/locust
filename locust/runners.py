@@ -40,11 +40,8 @@ class LocustRunner(object):
         self.exceptions = {}
         self.stats = global_stats
 
-        for locust in self.locust_classes:
-            if self.host is not None:
-                locust.host = self.host
-            if options.locust_args:
-                locust.args = options.locust_args
+        for locust_class in self.locust_classes:
+            locust_class.locust_init(self.NODE_TYPE, self.host, options.locust_args)
 
         # register listener that resets stats when hatching is complete
         def on_hatch_complete(user_count):
@@ -197,6 +194,8 @@ class LocustRunner(object):
 
 
 class LocalLocustRunner(LocustRunner):
+    NODE_TYPE = 'local'
+
     def __init__(self, locust_classes, options):
         super(LocalLocustRunner, self).__init__(locust_classes, options)
 
@@ -234,6 +233,8 @@ class SlaveNode(object):
 
 
 class MasterLocustRunner(DistributedLocustRunner):
+    NODE_TYPE = 'master'
+
     def __init__(self, locust_classes, options, *args, **kwargs):
         super(MasterLocustRunner, self).__init__(locust_classes, options, *args, **kwargs)
         self.swarm_slave_count = options.slave_count
@@ -389,6 +390,7 @@ class MasterLocustRunner(DistributedLocustRunner):
 
 
 class SlaveLocustRunner(DistributedLocustRunner):
+    NODE_TYPE = 'slave'
     def __init__(self, locust_classes, options, *args, **kwargs):
         super(SlaveLocustRunner, self).__init__(locust_classes, options, *args, **kwargs)
         self.client_id = (socket.gethostname() + "_" +

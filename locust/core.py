@@ -100,6 +100,17 @@ class Locust(object):
     def __init__(self):
         super(Locust, self).__init__()
 
+    @classmethod
+    def locust_init(cls, node_type, host, args):
+        """Called when the Locust class is going to be used in the swarm.
+
+        Can be overridden to add initialization that is run one time on system startup. (e.g. event registration)
+        """
+        if host is not None:
+            cls.host = host
+        if args:
+            cls.args = args
+
     def run(self):
         try:
             self.task_set(self).run()
