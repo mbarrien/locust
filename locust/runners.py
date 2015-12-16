@@ -40,6 +40,8 @@ class LocustRunner(object):
         self.stats = global_stats
 
         for locust in self.locust_classes:
+            if self.host is not None:
+                locust.host = self.host
             if options.locust_args:
                 locust.args = options.locust_args
 
@@ -76,8 +78,6 @@ class LocustRunner(object):
                               locust.__name__)
                 continue
 
-            if self.host is not None:
-                locust.host = self.host
             if stop_timeout is not None:
                 locust.stop_timeout = stop_timeout
 
