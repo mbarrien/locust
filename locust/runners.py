@@ -182,9 +182,10 @@ class LocustRunner(object):
         # if we are currently hatching locusts we need to kill the hatching greenlet first
         if self.hatching_greenlet and not self.hatching_greenlet.ready():
             self.hatching_greenlet.kill(block=True)
+        events.locust_stop_hatching.fire()
         self.locusts.kill(block=True)
         self.state = STATE_STOPPED
-        events.locust_stop_hatching.fire()
+        events.locust_stopped.fire()
 
     def log_exception(self, node_id, msg, formatted_tb):
         key = hash(formatted_tb)
@@ -322,6 +323,9 @@ class MasterLocustRunner(DistributedLocustRunner):
         for client in self.clients.itervalues():
             self.server.send(Message("quit", None, None))
         self.greenlet.kill(block=True)
+        if self.state != STATE_STOPPED:
+            self.state = STATE_STOPPED
+            events.master_stopped.fire()
 
     def client_listener(self):
         while True:
@@ -347,6 +351,7 @@ class MasterLocustRunner(DistributedLocustRunner):
                 del self.clients[msg.node_id]
                 if len(self.clients.hatching + self.clients.running) == 0:
                     self.state = STATE_STOPPED
+                    events.master_stopped.fire()
                 logger.info("Removing %s client from running clients" % (msg.node_id))
             elif msg.type == "stats":
                 events.slave_report.fire(client_id=msg.node_id, data=msg.data)

@@ -125,3 +125,13 @@ locust_stop_hatching = EventHook()
 """
 *locust_stop_hatching* is fired when terminate the hatching process on any locust worker.
 """
+
+master_stopped = EventHook()
+"""
+*master_stopped* is fired on the master when all locust processes have stopped on all slaves.
+"""
+
+locust_stopped = EventHook()
+"""
+*loucst_stopped* is fired when all locust processes have stopped on this host (slave or local).
+"""
