@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages, Command
 import sys, os
 
-version = '0.7.3'
+version = '0.8.0a1'
 
 
 class Unit2Discover(Command):
@@ -40,7 +40,7 @@ setup(
         "Intended Audience :: System Administrators",
     ],
     keywords='',
-    author='Jonatan Heyman, Carl Bystrom, Joakim Hamrén, Hugo Heyman',
+    author='Jonatan Heyman, Carl Bystrom, Joakim Hamrén, Hugo Heyman, Michael Barrientos',
     author_email='',
     url='http://locust.io',
     license='MIT',
