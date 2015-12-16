@@ -90,7 +90,10 @@ class Locust(object):
 
     weight = 10
     """Probability of locust being chosen. The higher the weight, the greater is the chance of it being chosen."""
-        
+
+    args = []
+    """Extra arguments passed at the command line."""
+
     client = NoClientWarningRaiser()
     _catch_exceptions = True
 

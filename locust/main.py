@@ -235,6 +235,13 @@ def parse_options():
         help="show program's version number and exit"
     )
 
+    parser.add_option(
+        '--locust-arg',
+        action='append',
+        dest='locust_args',
+        help="extra argument to pass to each locust's initializer. Repeatable."
+    )
+
     # Finalize
     # Return three-tuple of parser + the output from parse_args (opt obj, args)
     opts, args = parser.parse_args()

@@ -38,7 +38,11 @@ class LocustRunner(object):
         self.hatching_greenlet = None
         self.exceptions = {}
         self.stats = global_stats
-        
+
+        for locust in self.locust_classes:
+            if options.locust_args:
+                locust.args = options.locust_args
+
         # register listener that resets stats when hatching is complete
         def on_hatch_complete(user_count):
             self.state = STATE_RUNNING
