@@ -205,10 +205,24 @@ class LocalLocustRunner(LocustRunner):
             self.log_exception("local", str(exception), formatted_tb)
         events.locust_error += on_locust_error
 
+        def on_quitting():
+            self.quit()
+        events.quitting += on_quitting
+
+    def quit(self):
+        self.stop()
+
     def start_hatching(self, locust_count=None, hatch_rate=None, wait=False):
-        self.hatching_greenlet = gevent.spawn(
-            lambda: super(LocalLocustRunner, self).start_hatching(locust_count, hatch_rate,
-                                                                  wait=wait))
+        def do_hatch():
+            try:
+                result = super(LocalLocustRunner, self).start_hatching(locust_count, hatch_rate,
+                                                                       wait=wait)
+            finally:
+                if wait:
+                    self.hatching_greenlet = None  # prevent killing ourselves
+                    self.stop()
+            return result
+        self.hatching_greenlet = gevent.spawn(do_hatch)
         self.greenlet = self.hatching_greenlet
 
 
@@ -392,6 +406,7 @@ class MasterLocustRunner(DistributedLocustRunner):
 
 class SlaveLocustRunner(DistributedLocustRunner):
     NODE_TYPE = 'slave'
+
     def __init__(self, locust_classes, options, *args, **kwargs):
         super(SlaveLocustRunner, self).__init__(locust_classes, options, *args, **kwargs)
         self.client_id = (socket.gethostname() + "_" +
